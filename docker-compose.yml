@@ -1,0 +1,55 @@
+
+
+services:
+  userbot:
+    build:
+      context: ./telethon_script
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ./telethon_script/app:/app
+    depends_on:
+      redis_cache:
+        condition: service_healthy
+      msg_broker:
+        condition: service_healthy
+  server_bot:
+    build:
+      context: ./aiogram_script
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      redis_cache:
+        condition: service_healthy
+      msg_broker:
+        condition: service_healthy
+  msg_broker:
+    build:
+      context: ./rmq
+      dockerfile: Dockerfile
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RMQ_PSW} 
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+  redis_cache:
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
