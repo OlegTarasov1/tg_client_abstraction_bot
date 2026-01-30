@@ -51,11 +51,13 @@ async def assemble_kb_listing_users(
 
     if finish < len(users):
         nav.append(
-            text = "Вперёд",
-            callback_data = UserCallback(
-                    limit = limit,
-                    offset = offset + 1
-                ).pack()
+            InlineKeyboardButton(
+                text = "Вперёд",
+                callback_data = UserCallback(
+                        limit = limit,
+                        offset = offset + 1
+                    ).pack()
+            )
         )
     
     kb.row(*nav)
